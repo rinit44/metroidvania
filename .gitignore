@@ -1,0 +1,13 @@
+# Dossier de compilation
+build/
+
+# Exécutables
+*.exe
+*.out
+
+# Fichiers temporaires de compilation
+*.o
+*.obj
+
+# Config locale VS Code (optionnel - décommente si tu ne veux pas la versionner)
+# .vscode/
