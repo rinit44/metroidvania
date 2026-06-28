@@ -51,6 +51,12 @@ int main() {
     p3.height = 30;
     platforms.push_back(p3);
 
+    // Caméra qui suit le joueur
+    Camera2D camera = { 0 };
+    camera.target = (Vector2){ playerX, playerY };      // suit le joueur
+    camera.offset = (Vector2){ 400, 300 };               // centre de l'écran (800/2, 600/2)
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
     // === LA BOUCLE DE JEU ===
     while (!WindowShouldClose()) {
 
@@ -80,12 +86,12 @@ int main() {
         }
 
         // === Bloquer le joueur à gauche et à droite ===
-        if (playerX < 0) {
-            playerX = 0;
-        }
-        if (playerX > 760) {
-            playerX = 760;
-        }
+        // if (playerX < 0) {
+        //    playerX = 0;
+        // }
+        // if (playerX > 760) {
+        //    playerX = 760;
+        // }
 
         // === COLLISION AVEC TOUTES LES PLATEFORMES ===
         for (int i = 0; i < platforms.size(); i++) {
@@ -100,15 +106,17 @@ int main() {
             }
         }
         
-
+        camera.target = (Vector2){ playerX, playerY };
         // === DESSIN ===
         BeginDrawing();
             ClearBackground(BLACK);
-            DrawRectangle(playerX, playerY, 40, 60, BLUE); // joueur
-            DrawRectangle(0, 560, 800, 40, GRAY); // sol
-            for (int i = 0; i < platforms.size(); i++) {
-                DrawRectangle(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height, GREEN);
-            }
+            BeginMode2D(camera);
+                DrawRectangle(playerX, playerY, 40, 60, BLUE); // joueur
+                DrawRectangle(0, 560, 2000, 40, GRAY); // sol
+                for (int i = 0; i < platforms.size(); i++) {
+                    DrawRectangle(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height, GREEN);
+                }
+            EndMode2D();
         EndDrawing();
 
     }
