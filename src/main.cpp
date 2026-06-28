@@ -79,6 +79,10 @@ int main() {
     guardianLines.push_back("Tu vas devoir faire un choix crucial pour le reste de ta vie.");
 
     int currentLine = 0;
+    // --- Porte de l'intro ---
+    float doorX = 1200;
+
+    bool introDialogueDone = false;
 
     // ===============================================================
     //  BOUCLE DE JEU
@@ -91,9 +95,13 @@ int main() {
 
         // ----- INTRO -----
         if (gameState == INTRO) {
-
-            if (IsKeyDown(KEY_D)) playerX = playerX + 2;
-            if (IsKeyDown(KEY_A)) playerX = playerX - 2;
+            if (introDialogueDone) {
+                if (IsKeyDown(KEY_D)) playerX = playerX + 2;
+                if (IsKeyDown(KEY_A)) playerX = playerX - 2;
+            }
+            if (playerX > doorX - 40) {
+                playerX = doorX - 40;
+            }
 
             velocityY = velocityY + gravity;
             playerY = playerY + velocityY;
@@ -107,7 +115,7 @@ int main() {
                 if (currentLine < (int)guardianLines.size() - 1) {
                     currentLine = currentLine + 1;
                 } else {
-                    gameState = GAME;
+                    introDialogueDone = true;
                 }
             }
 
@@ -117,6 +125,7 @@ int main() {
 
         // ----- JEU PRINCIPAL -----
         if (gameState == GAME) {
+
 
             if (IsKeyDown(KEY_D)) playerX = playerX + 5;
             if (IsKeyDown(KEY_A)) playerX = playerX - 5;
@@ -166,10 +175,14 @@ int main() {
                 BeginMode2D(camera);
                     DrawRectangle(-5000, 560, 10000, 400, (Color){ 20, 20, 20, 255 });
                     DrawRectangle(playerX, playerY, 40, 60, BLUE);
+                    DrawRectangle(doorX + 60, -2000, 5000, 5000, (Color){ 10, 10, 12, 255 });
+                    DrawRectangle(doorX, 440, 60, 120, (Color){ 80, 70, 90, 255 });
                 EndMode2D();
-                DrawText("Le Gardien :", 50, 40, 20, GRAY);
-                DrawText(guardianLines[currentLine].c_str(), 50, 70, 20, WHITE);
-                DrawText("[Entree] pour continuer", 50, 550, 16, DARKGRAY);
+                if (!introDialogueDone) {
+                    DrawText("Le Gardien :", 50, 40, 20, GRAY);
+                    DrawText(guardianLines[currentLine].c_str(), 50, 70, 20, WHITE);
+                    DrawText("[Entree] pour continuer", 50, 550, 16, DARKGRAY);
+                }
             }
 
             // ----- JEU PRINCIPAL -----
