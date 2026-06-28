@@ -2,19 +2,16 @@
 #include <vector>
 #include <string>
 
-
 // ===================================================================
-//  TYPES (enum et classes)
+//  TYPES
 // ===================================================================
 
-// Les différents états (scènes) du jeu
 enum GameState{
-    INTRO,        // écran noir, le gardien parle, choix de l'élément
-    WEAPON_ROOM,  // salle des armes, choix de l'arme
-    GAME          // le jeu principal (plateformes, exploration)
+    INTRO,
+    WEAPON_ROOM,
+    GAME
 };
 
-// Une plateforme du jeu
 class Platform {
 public:
     float x;
@@ -28,27 +25,24 @@ public:
 // ===================================================================
 int main() {
 
-    // --- Initialisation de la fenêtre ---
     int screenWidth = 800;
     int screenHeight = 600;
 
     InitWindow(screenWidth, screenHeight, "Elemics");
     SetTargetFPS(60);
 
-    // État de départ du jeu
     GameState gameState = INTRO;
 
-    // --- Variables du joueur ---
+    // --- Joueur ---
     float playerX = 400;
     float playerY = 300;
     float velocityY = 0;
     float gravity = 0.5;
     bool isOnGround = false;
 
-    // --- Création des plateformes ---
+    // --- Plateformes ---
     std::vector<Platform> platforms;
 
-    // Plateforme 1
     Platform p1;
     p1.x = 400;
     p1.y = 465;
@@ -56,7 +50,6 @@ int main() {
     p1.height = 40;
     platforms.push_back(p1);
 
-    // Plateforme 2
     Platform p2;
     p2.x = 150;
     p2.y = 350;
@@ -64,7 +57,6 @@ int main() {
     p2.height = 20;
     platforms.push_back(p2);
 
-    // Plateforme 3
     Platform p3;
     p3.x = 400;
     p3.y = 300;
@@ -72,10 +64,10 @@ int main() {
     p3.height = 30;
     platforms.push_back(p3);
 
-    // --- Caméra qui suit le joueur ---
+    // --- Caméra ---
     Camera2D camera = { 0 };
-    camera.target = (Vector2){ playerX, playerY };   // point suivi (le joueur)
-    camera.offset = (Vector2){ 400, 300 };           // affiché au centre de l'écran
+    camera.target = (Vector2){ playerX, playerY };
+    camera.offset = (Vector2){ 400, 300 };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -86,66 +78,59 @@ int main() {
     guardianLines.push_back("Avance. Marche. Et ecoute ma voix.");
     guardianLines.push_back("Tu vas devoir faire un choix crucial pour le reste de ta vie.");
 
-    int currentLine = 0;   // quelle phrase on affiche
+    int currentLine = 0;
 
     // ===============================================================
-    //  BOUCLE DE JEU (tourne 60x par seconde)
+    //  BOUCLE DE JEU
     // ===============================================================
     while (!WindowShouldClose()) {
 
         // ===========================================================
-        //  LOGIQUE (mise à jour de l'état du jeu)
+        //  LOGIQUE
         // ===========================================================
 
-        // ----- ÉTAT : INTRO -----
+        // ----- INTRO -----
         if (gameState == INTRO) {
 
-            // Déplacement gauche / droite (marche lente)
             if (IsKeyDown(KEY_D)) playerX = playerX + 2;
             if (IsKeyDown(KEY_A)) playerX = playerX - 2;
 
-            // Gravité (le perso marche sur le sol, il ne flotte pas)
             velocityY = velocityY + gravity;
             playerY = playerY + velocityY;
 
-            // Sol invisible à y = 500
             if (playerY > 500) {
                 playerY = 500;
                 velocityY = 0;
             }
-        // Passer à la phrase suivante avec Entrée
+
             if (IsKeyPressed(KEY_ENTER)) {
-                if (currentLine < guardianLines.size() - 1) {
+                if (currentLine < (int)guardianLines.size() - 1) {
                     currentLine = currentLine + 1;
+                } else {
+                    gameState = GAME;
                 }
             }
 
-            // La caméra suit le joueur, décalé en bas à gauche
             camera.offset = (Vector2){ 250, 400 };
             camera.target = (Vector2){ playerX, playerY };
         }
 
-        // ----- ÉTAT : JEU PRINCIPAL -----
+        // ----- JEU PRINCIPAL -----
         if (gameState == GAME) {
 
-            // Déplacement gauche / droite
             if (IsKeyDown(KEY_D)) playerX = playerX + 5;
             if (IsKeyDown(KEY_A)) playerX = playerX - 5;
 
-            // Saut (seulement si au sol)
             if (IsKeyPressed(KEY_SPACE) && isOnGround) {
                 velocityY = -12;
             }
 
-            // Gravité (le joueur tombe de plus en plus vite)
             velocityY = velocityY + gravity;
             playerY = playerY + velocityY;
 
-            // Bords du joueur (calculés depuis le coin haut-gauche)
-            float playerBottom = playerY + 60;   // les pieds
-            float playerRight = playerX + 40;    // le bord droit
+            float playerBottom = playerY + 60;
+            float playerRight = playerX + 40;
 
-            // Collision avec le sol
             if (playerY > 500) {
                 playerY = 500;
                 velocityY = 0;
@@ -154,8 +139,7 @@ int main() {
                 isOnGround = false;
             }
 
-            // Collision avec toutes les plateformes
-            for (int i = 0; i < platforms.size(); i++) {
+            for (int i = 0; i < (int)platforms.size(); i++) {
                 if (playerRight > platforms[i].x &&
                     playerX < platforms[i].x + platforms[i].width &&
                     playerBottom > platforms[i].y &&
@@ -167,45 +151,41 @@ int main() {
                 }
             }
 
-            // La caméra suit le joueur, centré
             camera.offset = (Vector2){ 400, 300 };
             camera.target = (Vector2){ playerX, playerY };
         }
 
         // ===========================================================
-        //  DESSIN (affichage à l'écran)
+        //  DESSIN
         // ===========================================================
         BeginDrawing();
             ClearBackground(BLACK);
 
-            // ----- DESSIN : INTRO -----
+            // ----- INTRO -----
             if (gameState == INTRO) {
                 BeginMode2D(camera);
-                    // Sol très sombre, à peine visible dans le noir
                     DrawRectangle(-5000, 560, 10000, 400, (Color){ 20, 20, 20, 255 });
-                    DrawRectangle(playerX, playerY, 40, 60, BLUE);   // le joueur
+                    DrawRectangle(playerX, playerY, 40, 60, BLUE);
                 EndMode2D();
-                // Phrase actuelle du Gardien
                 DrawText("Le Gardien :", 50, 40, 20, GRAY);
                 DrawText(guardianLines[currentLine].c_str(), 50, 70, 20, WHITE);
                 DrawText("[Entree] pour continuer", 50, 550, 16, DARKGRAY);
             }
 
-            // ----- DESSIN : JEU PRINCIPAL -----
+            // ----- JEU PRINCIPAL -----
             if (gameState == GAME) {
-                BeginMode2D(camera);   // tout ce qui suit défile avec la caméra
-                    DrawRectangle(playerX, playerY, 40, 60, BLUE);       // joueur
-                    DrawRectangle(0, 560, 2000, 40, GRAY);               // sol
-                    for (int i = 0; i < platforms.size(); i++) {         // plateformes
+                BeginMode2D(camera);
+                    DrawRectangle(playerX, playerY, 40, 60, BLUE);
+                    DrawRectangle(0, 560, 2000, 40, GRAY);
+                    for (int i = 0; i < (int)platforms.size(); i++) {
                         DrawRectangle(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height, GREEN);
                     }
-                EndMode2D();           // fin de la zone caméra
+                EndMode2D();
             }
 
         EndDrawing();
     }
 
-    // --- Fermeture propre ---
     CloseWindow();
     return 0;
 }
